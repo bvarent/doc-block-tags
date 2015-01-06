@@ -1,0 +1,26 @@
+{
+    "name": "bvarent/doc-block-tags",
+    "description": "A library to read tags from DocBlocks in PHP class files.",
+    "type" : "library",
+    "license" : "LGPL-3.0+",
+    "authors": [
+        {
+            "name": "Roel Arents",
+            "email": "r.arents@bva-auctions.com"
+        }
+    ],
+    "require": {
+        "phpdocumentor/reflection-docblock": ">=2.0",
+        "doctrine/common": ">=2.4",
+        "zendframework/zend-servicemanager": ">=2.2",
+        "zendframework/zend-modulemanager": ">=2.2",
+        "zendframework/zend-config": ">=2.2",
+        "php": ">=5.3.23"
+    },
+    "autoload": {
+        "psr-4": {
+            "DocBlockTags\\": "src/",
+            "DocBlockTags\\Tests\\": "tests/src/"
+        }
+    }
+}
