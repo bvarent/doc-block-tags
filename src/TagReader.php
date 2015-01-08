@@ -64,6 +64,45 @@ class TagReader implements Reader
     }
     
     /**
+     * Checks if $haystack string ends with $needle string.
+     * @param string $haystack
+     * @param string $needle
+     * @param boolean $case_insensitivity Be insensitive to case?
+     * @return boolean TRUE if $haystack ends with $needle
+     * @todo Move this function to some stdlib.
+     */
+    protected static function stringEndsWith($haystack, $needle, $case_insensitivity = false)
+    {
+        if ($needle === '') return true;
+        $strlen = strlen($haystack);
+        $testlen = strlen($needle);
+        if ($testlen > $strlen) return false;
+        return substr_compare($haystack, $needle, $strlen - $testlen, $testlen, $case_insensitivity) === 0;
+    }
+
+    /**
+     * Try to restore the case in Use Statements aliases. Since Doctrine's
+     *  StaticReflectionParser serves lower case, but phpDocumentor is case
+     *  sensitive.
+     * @todo Think of something better. This does not cover 'use Space\Class as Alias'.
+     */
+    protected function caseUseStatements(array & $useStatements)
+    {
+        $casedStatements = array();
+        foreach ($useStatements as $alias => $full)
+        {
+            if (static::stringEndsWith($full, $alias, true)) {
+                $casedAlias = substr($full, -strlen($alias));
+                if ($casedAlias !== $alias) {
+                    $casedStatements[$casedAlias] = $full;
+                }
+            }
+        }
+        
+        $useStatements = array_merge($casedStatements, $useStatements);
+    }
+    
+    /**
      * Tries to get as much info about the Context from a Reflector.
      * @param Reflector $reflector
      * @return Context
@@ -81,6 +120,7 @@ class TagReader implements Reader
         $useStatements = array();
         if (method_exists($reflector, 'getUseStatements')) {
             $useStatements = $reflector->getUseStatements();
+            $this->caseUseStatements($useStatements);
         }
         else {
             trigger_error('Could not reliably determine the context of the tag. '
