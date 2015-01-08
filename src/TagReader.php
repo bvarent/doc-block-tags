@@ -16,7 +16,19 @@ use ReflectionProperty;
 use Reflector;
 
 /**
- * Reads tags from docblocks. Returns them as instantions of TagAnnotation.
+ * Machine to read Tags from DocBlocks, as if they were Annotations.
+ * 
+ * We distinguish these three concepts:
+ * - Tag: A PhpDoc tag as defined by PhpDocumentor.
+ * - Annotation: An annotation as defined by Doctrine.
+ * - Tag Annotation: Technically a Tag, but treated as an Annotation.
+ * 
+ * So this implementation of {@see Doctrine\Common\Annotations\Reader} reads Tags,
+ *  but serves them as if they were Annotations. Those tags would normally be
+ *  ignored by Doctrine's AnnotationReader.
+ * 
+ * Custom Tag classes can be registered, to complement and/or override
+ *  PhpDocumentor's built-in classes.
  * 
  * Make sure to use \Doctrine\Common\Reflection\StaticReflectionClass, since it
  *  also parses use statements. That way the types in e.g. @param tags will be
@@ -31,7 +43,7 @@ class TagReader implements Reader
     protected $tagClassNameMap = array();
     
     /**
-     * Registers a class to be instantiated when a tag with some name is found.
+     * Registers a class to be instantiated when a Tag with some name is found.
      * This is on top of the registered classes in phpDocumentor\Reflection\DocBlock\Tag.
      * @param string $tagName
      * @param string $tagClassName
@@ -82,12 +94,12 @@ class TagReader implements Reader
     }
     
     /**
-     * Creates (or keeps) a tag from a phpDocumentor Tag.
+     * Creates (or keeps) a Tag from a phpDocumentor Tag.
+     *  If a custom Tag class was registered, it has priority.
      * @param Tag $tag
      * @return Tag
-     * @throws Exception
      */
-    protected function createAnnotationTag(Tag $tag)
+    protected function createTagAnnotation(Tag $tag)
     {
         $name = $tag->getName();
         
@@ -108,7 +120,7 @@ class TagReader implements Reader
     }
     
     /**
-     * Figures out a tag's target from its reflector which provided the DocBlock.
+     * Figures out a Tag's target from its reflector which provided the DocBlock.
      * @param Reflector $reflector E.g. a ReflectionClass or ReflectionMethod
      * @return int A constant from Target specifying the target of the tag.
      */
@@ -127,9 +139,10 @@ class TagReader implements Reader
     }
     
     /**
-     * Gets all Tag Annotations in a docblock
+     * Gets all Tag Annotations in a DocBlock.
      * @param Reflector $reflector Supporting the getDocComment method.
-     * @return TagAnnotation[]
+     * @return Tag[]
+     * @todo Perhaps try to recognize a Tag as an Annotation and ignore it?
      */
     protected function getTagAnnotations(Reflector $reflector)
     {
@@ -140,7 +153,7 @@ class TagReader implements Reader
         $tagAnnotations = array();
         foreach ($tags as $tag) {
             /* @var $tag Tag */
-            $tagAnnotation = $this->createAnnotationTag($tag);
+            $tagAnnotation = $this->createTagAnnotation($tag);
             if ($tagAnnotation) {
                 $tagAnnotations[] = $tagAnnotation;
             }
@@ -150,16 +163,16 @@ class TagReader implements Reader
     }
     
     /**
-     * Gets the first annotation matching the requested name.
+     * Gets the first Tag Annotation matching the requested name.
      * @param Reflector $reflector
-     * @param type $annotationName
-     * @return type
+     * @param string $annotationName
+     * @return Tag
      */
     protected function getTagAnnotation(Reflector $reflector, $annotationName)
     {
         $allTagAnnotations = $this->getClassAnnotations($reflector);
         foreach ($allTagAnnotations as $tagAnnotation) {
-            /* @var $tagAnnotation TagAnnotation */
+            /* @var $tagAnnotation Tag */
             if ($annotationName == $tagAnnotation->getName()) {
                 return $tagAnnotation;
             }
