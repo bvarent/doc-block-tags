@@ -164,7 +164,7 @@ class TagReader implements Reader
      * @param Reflector $reflector E.g. a ReflectionClass or ReflectionMethod
      * @return int A constant from Target specifying the target of the tag.
      */
-    protected function getTarget(Reflector $reflector)
+    public function getTarget(Reflector $reflector)
     {
         switch (true) {
             case ($reflector instanceof \ReflectionClass):

@@ -13,5 +13,6 @@ return array(
     ),
     'initializers' => array(
         __NAMESPACE__ . '\ServiceManager\TagReaderInitializer',
+        __NAMESPACE__ . '\ServiceManager\ReflectionServiceInitializer',
     ),
 );

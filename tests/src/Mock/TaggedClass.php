@@ -5,7 +5,11 @@ namespace DocBlockTags\Tests\Mock;
 use Foo\SomeClass;
 
 /**
- * @property SomeClass $someClass A property of some class.
+ * 
+ * @property SomeClass $someProp A property typed Foo\SomeClass with multi-line de-
+ *  scription.
+ * @property-write SomeClass $someWriteOnlyProp A write-only property typed Foo\SomeClass.
+ * @property-read SomeClass $someReadOnlyProp A readonly property typed Foo\SomeClass.
  */
 class TaggedClass
 {
@@ -16,12 +20,12 @@ class TaggedClass
     /**
      * @var bool
      */
-    public $boolProp;
+    private $boolProp;
 
     /**
      * @var float
      */
-    public $floatProp;
+    protected $floatProp;
 
     /**
      * There might be some text here.

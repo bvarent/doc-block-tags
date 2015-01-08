@@ -15,6 +15,8 @@
         "zendframework/zend-servicemanager": ">=2.2",
         "zendframework/zend-modulemanager": ">=2.2",
         "zendframework/zend-config": ">=2.2",
+        "typo3/flow": "^2.2",
+        "doctrine/migrations": "@dev",
         "php": ">=5.3.23"
     },
     "autoload": {
@@ -22,5 +24,20 @@
             "DocBlockTags\\": "src/",
             "DocBlockTags\\Tests\\": "tests/src/"
         }
+    },
+    "extra": {
+        "installer-paths": "Typo3 by default installs in /Packages. We want it in /vendor.",
+        "installer-paths": {
+            "vendor/typo3/Packages/Framework/{$name}/": ["type:typo3-flow-framework"],
+            "vendor/typo3/Packages/Application/{$name}/": ["type:typo3-flow-package"],
+            "vendor/typo3/Packages/Plugins/{$name}/": ["type:typo3-flow-plugin"],
+            "vendor/typo3/Packages/Sites/{$name}/": ["type:typo3-flow-site"],
+            "vendor/typo3/Packages/Boilerplates/{$name}/": ["type:typo3-flow-boilerplate"],
+            "vendor/typo3/Build/{$name}/": ["type:typo3-flow-build"]
+        }
+    },
+    "config": {
+        "vendor-dir": "Although the config node is only used for projects, this vendor-dir node is to stop Typo3 from complaining.",
+        "vendor-dir": "vendor"
     }
 }
