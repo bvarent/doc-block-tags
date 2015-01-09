@@ -107,6 +107,8 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
     /**
      * {@see addTagsAsAnnotations} for a class' properties.
      * @param StaticReflectionParser $reflectionParser
+     * @todo Since StaticReflectionProperty does not support docblocks for static
+     *  members, tags are not added for those atm.
      */
     protected function addPropertyTagsAsAnnotations(StaticReflectionParser $reflectionParser)
     {
@@ -117,14 +119,18 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
         }
         foreach ($properties as $propertyName => &$property) {
             $reflector = $reflectionParser->getReflectionProperty($propertyName);
-            $this->addTagsAsAnnotations($reflector, $property);
-            $this->addPropertyStaticInfo($className, $propertyName);
+            $isStatic = $this->addPropertyStaticInfo($className, $propertyName);
+            if (!$isStatic) {
+                $this->addTagsAsAnnotations($reflector, $property);
+            }
         }
     }
 
     /**
      * {@see addTagsAsAnnotations} for a class' methods.
      * @param StaticReflectionParser $reflectionParser
+     * @todo Since StaticReflectionProperty does not support docblocks for static
+     *  members, tags are not added for those atm.
      */
     protected function addMethodTagsAsAnnotations(StaticReflectionParser $reflectionParser)
     {
@@ -135,7 +141,10 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
         }
         foreach ($methods as $methodName => &$method) {
             $reflector = $reflectionParser->getReflectionMethod($methodName);
-            $this->addTagsAsAnnotations($reflector, $method);
+            $isStatic = $this->digArray($method, static::DATA_METHOD_STATIC);
+            if (!$isStatic) {
+                $this->addTagsAsAnnotations($reflector, $method);
+            }
         }
     }
     
