@@ -150,10 +150,15 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
         $knownAnnotations = (array) $this->digArray($targetNode,
                 $annotationsKey);
         $knownAnnotationNames = array();
-        foreach ($knownAnnotations as $knownAnnotation) {
-            $knownAnnotationName = get_class($knownAnnotation);
-            $knownAnnotationNames[$knownAnnotationName] = true;
-            // TODO Instead of the full class name, get the contexted tag name. E.g. @ORM\Id vs @Id. (This might be impossible.)
+        foreach ($knownAnnotations as $knownAnnotationSet) {
+            if (!is_array($knownAnnotationSet)) {
+                $knownAnnotationSet = array($knownAnnotationSet);
+            }
+            foreach ($knownAnnotationSet as $knownAnnotation) {
+                $knownAnnotationName = get_class($knownAnnotation);
+                $knownAnnotationNames[$knownAnnotationName] = true;
+                // TODO Instead of the full class name, get the contexted tag name. E.g. @ORM\Id vs @Id. (This might be impossible.)
+            }
         }
         
         foreach ($tags as $tagAnnotation) {
