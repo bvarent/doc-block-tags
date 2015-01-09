@@ -109,17 +109,23 @@ class TagReader implements Reader
      */
     public function getContextFromReflector(Reflector $reflector)
     {
-        $class = $reflector;
-        if (method_exists($reflector, 'getDeclaringClass')) {
-            $class = $reflector->getDeclaringClass();
+        if ($reflector instanceof \ReflectionClass) {
+            $classReflector = $reflector;
+            $className = $classReflector->getName();
+            $this->classReflectors[$className] = $classReflector;
+        } elseif ($reflector instanceof \ReflectionProperty
+                || $reflector instanceof \ReflectionMethod
+        ) {
+            $classReflector = $reflector->getDeclaringClass();
         }
+        
         $namespace = null;
-        if (method_exists($reflector, 'getNamespaceName')) {
-            $namespace = $reflector->getNamespaceName();
+        if (method_exists($classReflector, 'getNamespaceName')) {
+            $namespace = $classReflector->getNamespaceName();
         }
         $useStatements = array();
-        if (method_exists($reflector, 'getUseStatements')) {
-            $useStatements = $reflector->getUseStatements();
+        if (method_exists($classReflector, 'getUseStatements')) {
+            $useStatements = $classReflector->getUseStatements();
             $this->caseUseStatements($useStatements);
         }
         else {
