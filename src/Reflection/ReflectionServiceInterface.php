@@ -338,6 +338,15 @@ interface ReflectionServiceInterface
     public function isPropertyPublic($className, $propertyName);
     
     /**
+     * Tells if the specified property is static
+     *
+     * @param string $className Name of the class containing the method
+     * @param string $propertyName Name of the property to analyze
+     * @return boolean TRUE if the property is static, otherwise FALSE
+     */
+    public function isPropertyStatic($className, $propertyName);
+    
+    /**
      * Tells if the specified property is readable
      *
      * @param string $className Name of the class containing the method

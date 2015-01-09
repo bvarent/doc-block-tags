@@ -34,7 +34,8 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
             ACCESSIBILITY_READ = 1,
             ACCESSIBILITY_WRITE = 2,
             DATA_METHOD_ANNOTATIONS = 93,
-            DATA_METHOD_TYPE = 94;
+            DATA_METHOD_TYPE = 94,
+            DATA_PROPERTY_STATIC = 95;
 
     /**
      * @var ServiceManager
@@ -74,6 +75,34 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
         $classReflector = $reflectionParser->getReflectionClass();
         $this->addTagsAsAnnotations($classReflector, $this->classReflectionData[$className]);
     }
+    
+    /**
+     * Determines if the property is static and saves it in the classReflectionData.
+     * @param string $className
+     * @param string $propertyName
+     * @return boolean The result.
+     */
+    protected function addPropertyStaticInfo($className, $propertyName)
+    {
+        $static = $this->digArray($this->classReflectionData,
+                $className,
+                static::DATA_CLASS_PROPERTIES,
+                $propertyName,
+                static::DATA_PROPERTY_STATIC);
+        if (null === $static) {
+            // Unfortunately we have no access to the original ReflectionProperty
+            //  so we have to create a new one.
+            $propRefl = new ReflectionProperty($className, $propertyName);
+            $static = $propRefl->isStatic();
+        }
+        $this->burryArray($this->classReflectionData, $static,
+                $className,
+                static::DATA_CLASS_PROPERTIES,
+                $propertyName,
+                static::DATA_PROPERTY_STATIC);
+        
+        return $static;
+    }
 
     /**
      * {@see addTagsAsAnnotations} for a class' properties.
@@ -89,6 +118,7 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
         foreach ($properties as $propertyName => &$property) {
             $reflector = $reflectionParser->getReflectionProperty($propertyName);
             $this->addTagsAsAnnotations($reflector, $property);
+            $this->addPropertyStaticInfo($className, $propertyName);
         }
     }
 
@@ -313,10 +343,10 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
     }
     
     /**
-     * Digs into an array unto a certain value, or returns null if the key does
-     *  not exist.
+     * Digs into a nested array unto a certain value, or returns null if a key
+     *  at some level does not exist.
      * @param array $array
-     * @param string $key * One or more keys
+     * @param string $keys * One or more keys
      * @return mixed
      */
     protected function digArray(array $array, $keys)
@@ -335,6 +365,37 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
         }
         
         return $array;
+    }
+    
+    /**
+     * Digs into a nested array to set a value at a certain level. Creates new
+     *  empty arrays if neccessary. 
+     * @param array $array
+     * @param mixed $value
+     * @param string $keys * One or more keys
+     * @return boolean False if a level was not null and not an array.
+     */
+    protected function burryArray(array $array, $value, $keys)
+    {
+        if (!is_array($keys)) {
+            $keys = func_get_args();
+            array_shift($keys);
+        }
+        
+        $lastKey = array_pop($keys);
+        
+        foreach ($keys as $key) {
+            if (isset($array[$key])) {
+                if (!is_array($array[$key])) {
+                    return false;
+                }
+            } else {
+                $array[$key] = array();
+            }
+            $array = $array[$key];
+        }
+        
+        $array[$lastKey] = $value;
     }
 
     public function getPropertyType($className, $propertyName)
@@ -375,6 +436,23 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
         $this->loadOrReflectClassIfNecessary($className);
         $visibility = $this->getPropertyVisibility($className, $propertyName);
         return $visibility === static::VISIBILITY_PUBLIC;
+    }
+
+    public function isPropertyStatic($className, $propertyName)
+    {
+        if (!$this->initialized) {
+            $this->initialize();
+        }
+        if ($className[0] === '\\') {
+            $className = substr($className, 1);
+        }
+        $this->loadOrReflectClassIfNecessary($className);
+        $static = $this->digArray($this->classReflectionData,
+                $className,
+                static::DATA_CLASS_PROPERTIES,
+                $propertyName,
+                static::DATA_PROPERTY_STATIC);
+        return (boolean) $static;
     }
 
     public function isPropertyReadable($className, $propertyName)
