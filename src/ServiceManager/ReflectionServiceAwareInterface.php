@@ -2,6 +2,8 @@
 
 namespace DocBlockTags\ServiceManager;
 
+use DocBlockTags\Reflection\ReflectionServiceInterface;
+
 /**
  * Shows dependence on a ReflectionService and provides setter injection.
  * 
