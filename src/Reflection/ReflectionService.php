@@ -410,6 +410,21 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
     }
     
     /**
+     * Tries to find out if the class is a proxy and modify the classname to be the origin.
+     * @param string $className Classname which will be changed into the origin.
+     * @return boolean True if the class was a proxy.
+     */
+    public function eliminateProxy(&$className)
+    {
+        // Not use instanceof, since Doctrine\ORM\Proxy\Proxy might not be known at all.
+        if (!array_search('Doctrine\ORM\Proxy\Proxy', class_implements($className))) {
+            return ;
+        }
+        
+        $className = get_parent_class($className);
+    }
+    
+    /**
      * Checks if $haystack string ends with $needle string.
      * @param string $haystack
      * @param string $needle
