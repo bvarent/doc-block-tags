@@ -57,6 +57,7 @@ ToDo
 * Make the Reflection Service cachable. (Use Doctrine cache?)
 * Make a class to represent a type instead of a string.
 * All //TODOs and @todos.
+* Get rid of Typo3 dependency.
 * More documentation.
  * Custom tag classes.
  * More examples.
