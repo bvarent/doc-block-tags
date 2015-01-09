@@ -40,7 +40,12 @@ class ComposerClassFinder implements ClassFinderInterface
      */
     public function getComposerDir()
     {
-        $dir = __DIR__;
+        // Find out where composer's ClassLoader is.
+        $classRefl = new \ReflectionClass('Composer\Autoload\ClassLoader');
+        $composerClassLoaderClassFileName = $classRefl->getFileName();
+        $dir = dirname($composerClassLoaderClassFileName);
+        
+        // Search up the directory tree for the dir containing the composer.json file.
         do {
             $composerConfigFilePath = $dir . DIRECTORY_SEPARATOR . 'composer.json';
             if (is_file($composerConfigFilePath)) {
