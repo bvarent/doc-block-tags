@@ -394,7 +394,7 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
         $lastKey = array_pop($keys);
         
         foreach ($keys as $key) {
-            if (isset($array[$key])) {
+            if (array_key_exists($key, $array)) {
                 if (!is_array($array[$key])) {
                     return false;
                 }
