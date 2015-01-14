@@ -24,5 +24,17 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface, Se
     {
         return include __DIR__ . '/../config/service.config.php';
     }
+    
+    public function getHydratorConfig()
+    {
+        return array(
+            'aliases' => array(
+                'reflectionservice' => __NAMESPACE__ . '\Hydrator\ReflectionServiceHydrator',
+            ),
+            'factories' => array(
+                __NAMESPACE__ . '\Hydrator\ReflectionServiceHydrator' => __NAMESPACE__ . '\ServiceManager\ReflectionServiceHydratorFactory',
+            ),
+        );
+    }
 
 }
