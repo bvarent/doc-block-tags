@@ -140,6 +140,10 @@ ReflectionServiceInterface, ServiceManagerAwareInterface
             return;
         }
         foreach ($methods as $methodName => &$method) {
+            if ($methodName == 'jsonSerialize') {
+                // FIXME Prevent jsonSerialize bug.
+                continue;
+            }
             $reflector = $reflectionParser->getReflectionMethod($methodName);
             $isStatic = $this->digArray($method, static::DATA_METHOD_STATIC);
             if (!$isStatic) {

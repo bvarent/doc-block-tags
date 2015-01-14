@@ -2,10 +2,8 @@
 
 namespace DocBlockTags;
 
-use DocBlockTags\TagAnnotation;
 use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\Common\Annotations\Reader;
-use DocBlockTags\Exception;
 use InvalidArgumentException;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Context;
@@ -36,6 +34,7 @@ use Reflector;
  */
 class TagReader implements Reader
 {
+    
     /**
      * Map of tag names to the class names which represent them.
      * @var Map<string, string>
@@ -109,34 +108,40 @@ class TagReader implements Reader
      */
     public function getContextFromReflector(Reflector $reflector)
     {
-        if ($reflector instanceof \ReflectionClass) {
-            $classReflector = $reflector;
-            $className = $classReflector->getName();
-            $this->classReflectors[$className] = $classReflector;
-        } elseif ($reflector instanceof \ReflectionProperty
-                || $reflector instanceof \ReflectionMethod
-        ) {
-            $classReflector = $reflector->getDeclaringClass();
-        }
-        
         $namespace = null;
-        if (method_exists($classReflector, 'getNamespaceName')) {
-            $namespace = $classReflector->getNamespaceName();
-        }
         $useStatements = array();
-        if (method_exists($classReflector, 'getUseStatements')) {
-            $useStatements = $classReflector->getUseStatements();
-            $this->caseUseStatements($useStatements);
-        }
-        else {
-            trigger_error('Could not reliably determine the context of the tag. '
-                    . 'Make sure to use a ReflectionClass which supports getUseStatements.',
-                    E_USER_WARNING);
-        }
         
-        $context = new Context($namespace, $useStatements);
-        
-        return $context;
+        // Try to reflect as much as possible.
+        try {
+            // Get the declaring class if the reflector is not reflecting a class itself.
+            if ($reflector instanceof \ReflectionClass) {
+                $classReflector = $reflector;
+                $className = $classReflector->getName();
+                $this->classReflectors[$className] = $classReflector;
+            } elseif ($reflector instanceof \ReflectionProperty
+                    || $reflector instanceof \ReflectionMethod
+            ) {
+                $classReflector = $reflector->getDeclaringClass();
+            }
+
+            // Try to get the class name and use statements.
+            if (method_exists($classReflector, 'getNamespaceName')) {
+                $namespace = $classReflector->getNamespaceName();
+            }
+            if (method_exists($classReflector, 'getUseStatements')) {
+                $useStatements = $classReflector->getUseStatements();
+                $this->caseUseStatements($useStatements);
+            }
+            else {
+                trigger_error('Could not reliably determine the context of the target. '
+                        . 'Make sure to use a ReflectionClass which supports getUseStatements.',
+                        E_USER_WARNING);
+            }
+        }
+        catch (\ReflectionException $reflectionException) {
+            // At least we tried...
+            echo 'break';
+        }
     }
     
     /**
