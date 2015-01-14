@@ -22,6 +22,28 @@ Installation
 * Add a requirement in your composer.json file.
 * Override the default module configuration in your application.config.
   See the module.config for documentation.
+* Unfortunately, at the moment you have to add some extra config to your
+  composer.json file to have Typo3 installed correctly:
+ * If you're using doctrine 2.4.x:  
+```javascript
+{ "require": {"doctrine/orm": "2.4.x as 2.3"} }
+```
+ * To install into the `vendor` dir instead of a `Packages` dir:  
+```javascript
+{
+    "extra": {
+        "installer-paths": "Typo3 by default installs in /Packages. We want it in /vendor.",
+        "installer-paths": {
+            "vendor/typo3/Packages/Framework/{$name}/": ["type:typo3-flow-framework"],
+            "vendor/typo3/Packages/Application/{$name}/": ["type:typo3-flow-package"],
+            "vendor/typo3/Packages/Plugins/{$name}/": ["type:typo3-flow-plugin"],
+            "vendor/typo3/Packages/Sites/{$name}/": ["type:typo3-flow-site"],
+            "vendor/typo3/Packages/Boilerplates/{$name}/": ["type:typo3-flow-boilerplate"],
+            "vendor/typo3/Build/{$name}/": ["type:typo3-flow-build"]
+        }
+    }
+}
+```
 
 Usage
 -----
